@@ -1,0 +1,43 @@
+server:
+  port: 9004
+
+
+spring:
+  application:
+    name: DashbaordConsumer
+
+  cloud:
+    function:
+      definition: processDashboardMessageFunction;dashboardConsumerFunction
+
+    stream:
+      binders:
+        kstream:
+          type: kstream
+          environment:
+            spring.cloud.stream.kafka.streams.binder:
+              applicationId: dashboard-streams-app
+              brokers: localhost:9092
+
+        kafka:
+          type: kafka
+          environment:
+            spring.cloud.stream.kafka.binder:
+              brokers: localhost:9092
+
+      bindings:
+        # INPUT FOR KAFKA STREAMS
+        processDashboardMessageFunction-in-0:
+          destination: dashboard-topic-input
+          binder: kstream
+
+        # OUTPUT OF KAFKA STREAMS
+        processDashboardMessageFunction-out-0:
+          destination: dashboard-topic-output
+          binder: kstream
+
+        # NORMAL KAFKA CONSUMER
+        dashboardConsumerFunction-in-0:
+          destination: dashboard-topic-output
+          binder: kafka
+          group: dashboard-consumer-group
