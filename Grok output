@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        personConsumer-in-0:
+          destination: people-topic
+          consumer:
+            maxAttempts: 3                          # ← Only retry 3 times
+            backOffInitialInterval: 1000           # 1st retry after 1 sec
+            backOffMultiplier: 2.0                 # Exponential back-off
+            backOffMaxInterval: 10000              # Max 10 sec between retries
+
+      kafka:
+        bindings:
+          personConsumer-in-0:
+            consumer:
+              enableDlq: true                     # ← Enable Dead Letter Topic
+              dlqName: people-topic-dlq           # ← Bad messages go here
+              dlqProducerProperties:
+                configuration:
+                  retries: 0                      # Don't retry when sending to DLQ
